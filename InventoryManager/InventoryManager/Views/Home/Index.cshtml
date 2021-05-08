@@ -1,0 +1,214 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <script src="~/Scripts/jquery-1.10.2.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            var getAllRecs = function ()
+            {
+                $.ajax({
+                    url: "/api/Product",
+                    type: "Get",
+                    contentType: "Application/json",
+                    success: function (result) {
+                        $("#tb").empty();
+                        var str = "";
+                        for (var i = 0; i < result.length; i++) {
+                            str = "<tr><td>" + result[i].ProductId + "</td>";
+                            str += "<td>" + result[i].ProductName + "</td>";
+                            str += "<td>" + result[i].Description + "</td>";
+                            str += "<td>" + result[i].Price + "</td>";
+                            
+                            $("#tb").append(str);
+                        }
+
+                    },
+                    error: function (err) {
+                        alert(err.statusCode);
+                        alert("Errrorr!");
+                    }
+                });
+            };
+            getAllRecs();
+            $("#btnSearch").click(function () {
+
+                $.ajax({
+                    url: "/api/Product/GetProductById/?id=" + $("#PID").val(),
+                    type: "Get",
+                    contentType: "Application/json",
+                    success: function (result)
+                    {
+                        if (result != null) {
+                            $("#PName").val(result.ProductName);
+                            $("#Description").val(result.Description);
+                            $("#Price").val(result.Price)
+                            
+                        }
+                        else {
+                            alert("Record Not Found!");
+                            $("#PName").val("");
+                            $("#Description").val("");
+                            $("#Price").val("");
+                            
+                        }
+                    },
+                    error: function (err)
+                    {
+                        alert("Error!");
+                        $("#PName").val("");
+                        $("#Description").val("");
+                        $("#Price").val("");
+                    }
+                });
+            });
+            $("#btnSave").click(function () {
+                var rec = { "ProductName": $("#PName").val(), "Description": $("#Description").val(), "Price": $("#Price").val()};
+                $.ajax({
+                    url: "/api/Product",
+                    type: "Post",
+                    data: JSON.stringify(rec),
+                    dataType:"text",
+                    contentType:"Application/json",
+                    success:function(result)
+                    {
+                 
+                            alert("Record Saved");
+                            getAllRecs();
+                        
+
+                    },
+                    error: function (err)
+                    {
+                        alert(err.statusCode);
+                        alert(err.statusText);
+                        alert("Error!");
+                    }
+                });
+            });
+            $("#btnUpdate").click(function () {
+                var rec = { "ProductId": $("#PID").val(), "ProductName": $("#PName").val(), "Description": $("#Description").val(), "Price": $("#Price").val() };
+                $.ajax({
+                    url: "/api/Product",
+                    type: "Put",
+                    data: JSON.stringify(rec),
+                    dataType: "text",
+                    contentType: "Application/json",
+                    success: function (result) {
+                        
+                            alert("Record Updated");
+                            getAllRecs();
+                        
+
+                    },
+                    error: function (err) {
+                        alert("Error!");
+                    }
+                });
+            });
+
+            $("#btnDelete").click(function () {
+
+                $.ajax({
+                    url: "/api/Product/" + $("#PID").val(),
+                    type: "Delete",
+                    contentType: "Application/json",
+                    success: function (result) {
+                       
+
+                            alert("Record Deleted!");
+                            $("#PName").val("");
+                            $("#Description").val("");
+                            $("#Price").val("");
+                           
+                            getAllRecs();
+                       
+                    },
+                    error: function (err) {
+                        alert("Error!");
+                    }
+                });
+            });
+
+
+
+        });
+    </script>
+</head>
+<body>
+    <table>
+        <tr>
+            <td>
+                Enter ID:
+            </td>
+            <td>
+                <input type="text" id="PID" />
+                <input type="button" value="Search" id="btnSearch" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.Label("Name")
+            </td>
+            <td>
+                @Html.TextBox("PName")
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                @Html.Label("Description")
+            </td>
+            <td>
+                @Html.TextBox("Description")
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                @Html.Label("Price")
+            </td>
+            <td>
+                @Html.TextBox("Price")
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="button" id="btnSave" value="save" />
+                <input type="button" id="btnUpdate" value="update" />
+                <input type="button" id="btnDelete" value="Delete" />
+            </td>
+        </tr>
+
+    </table>
+    <div>
+        <h1> Product List </h1>
+        <table border="1">
+            <tr>
+                <td>
+                    Product ID
+                </td>
+                <td>
+                    Product Name
+                </td>
+                <td>
+                    Description
+                </td>
+                <td>
+                    Price
+                </td>
+                
+            </tr>
+            <tbody id="tb"></tbody>
+        </table>
+    </div>
+</body>
+</html>
